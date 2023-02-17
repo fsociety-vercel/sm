@@ -6,7 +6,7 @@ importers:
     specifiers:
       eslint-config-custom: workspace:*
       prettier: latest
-      turbo: latest
+      turbo: 1.7.4
     devDependencies:
       eslint-config-custom: link:packages/eslint-config-custom
       prettier: 2.8.4
@@ -52,6 +52,7 @@ importers:
       next: ^13.1.1
       react: 18.2.0
       react-dom: 18.2.0
+      secure-middleware: workspace:*
       tsconfig: workspace:*
       typescript: ^4.5.3
       ui: workspace:*
@@ -59,6 +60,7 @@ importers:
       next: 13.1.6_pjwopsidmaokadturxaafygjp4
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+      secure-middleware: link:../../packages/secure-middleware
       ui: link:../../packages/ui
     devDependencies:
       '@babel/core': 7.20.12
@@ -86,6 +88,23 @@ importers:
       eslint-plugin-react: 7.31.8_eslint@7.32.0
     devDependencies:
       typescript: 4.9.5
+
+  packages/secure-middleware:
+    specifiers:
+      '@types/node': 18.13.0
+      eslint: 7.32.0
+      eslint-config-custom: workspace:*
+      true-myth: 6.2.0
+      tsconfig: workspace:*
+      typescript: 4.5.2
+    dependencies:
+      true-myth: 6.2.0
+    devDependencies:
+      '@types/node': 18.13.0
+      eslint: 7.32.0
+      eslint-config-custom: link:../eslint-config-custom
+      tsconfig: link:../tsconfig
+      typescript: 4.5.2
 
   packages/tsconfig:
     specifiers: {}
@@ -527,6 +546,10 @@ packages:
 
   /@types/node/17.0.45:
     resolution: {integrity: sha512-w+tIMs3rq2afQdsPJlODhoUEKzFP1ayaoyl1CcnwtIlsVe7K7bA1NGm4s3PraqTLlXnbIN84zuBlxBWo1u9BLw==}
+    dev: true
+
+  /@types/node/18.13.0:
+    resolution: {integrity: sha512-gC3TazRzGoOnoKAhUx+Q0t8S9Tzs74z7m0ipwGpSqQrleP14hKxP4/JUeEQcD3W1/aIpnWl8pHowI7WokuZpXg==}
     dev: true
 
   /@types/prop-types/15.7.5:
@@ -2294,6 +2317,11 @@ packages:
       is-number: 7.0.0
     dev: false
 
+  /true-myth/6.2.0:
+    resolution: {integrity: sha512-NYvzj/h2mGXmdIBmz825c/lQhpI4bzUQEEiBCAbNOVpr6aeYa1WTpJ+OmGmj1yPqbTLPKCCSi54yDnaEup504Q==}
+    engines: {node: 14.* || 16.* || >= 18.*}
+    dev: false
+
   /tsconfig-paths/3.14.1:
     resolution: {integrity: sha512-fxDhWnFSLt3VuTwtvJt5fpwxBHg5AdKWMsgcPOOIilyjymcYVZoCQF8fvFRezCNfblEXmi+PcM1eYHeOAgXCOQ==}
     dependencies:
@@ -2399,6 +2427,12 @@ packages:
       for-each: 0.3.3
       is-typed-array: 1.1.10
     dev: false
+
+  /typescript/4.5.2:
+    resolution: {integrity: sha512-5BlMof9H1yGt0P8/WF+wPNw6GfctgGjXp5hkblpyT+8rkASSmkUKMXrxR0Xg8ThVCi/JnHQiKXeBaEwCeQwMFw==}
+    engines: {node: '>=4.2.0'}
+    hasBin: true
+    dev: true
 
   /typescript/4.9.5:
     resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
