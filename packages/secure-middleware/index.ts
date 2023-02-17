@@ -3,8 +3,17 @@ import { Result } from "true-myth";
 export async function secure(
   req: Request,
   res?: Response
-): Promise<Result<{ count: number }, { res?: Response; reason: string }>> {
-  console.log("Inside secure functions");
+): Promise<Result<{ count: number }, { res: Response; reason: string }>> {
+  console.debug("secure: Inside secure function");
+
+  if (!res) {
+    console.error("secure: Unknown IP Address");
+    res = new Response(JSON.stringify({ error: "Unknown IP Address" }), {
+      status: 403,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   if (!req) {
     return Result.err({ res, reason: "No request" });
   }
