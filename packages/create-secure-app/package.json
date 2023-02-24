@@ -30,8 +30,5 @@
     "prompts": "2.4.2",
     "tsconfig": "workspace:*",
     "typescript": "4.9.5"
-  },
-  "dependencies": {
-    "secure-middleware": "workspace:0.0.0"
   }
 }
