@@ -1,4 +1,4 @@
-#!/usr/bin / env node
+#! /usr/bin/env node
 //
 // Inspired by create-next-app
 // https://github.com/vercel/next.js/blob/e91de8e0ddfd5b4a996c0e5df6549fe3981e1f6d/packages/create-next-app/index.ts

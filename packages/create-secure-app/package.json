@@ -1,7 +1,7 @@
 {
   "name": "create-secure-app",
   "description": "Installs middleware to secure your app.",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "license": "MIT",
   "types": "./dist/index.d.ts",
   "bin": {
