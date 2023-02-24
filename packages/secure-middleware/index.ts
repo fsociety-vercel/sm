@@ -1,28 +1,51 @@
 import { Result } from "true-myth";
 
+export interface SecureConfig {
+  errorStatusCode?: number;
+  errorBody?: string;
+}
+
 export async function secure(
   req: Request,
-  res?: Response
+  res?: Response,
+  config?: SecureConfig
 ): Promise<Result<{ count: number }, { res: Response; reason: string }>> {
   console.debug("secure: Inside secure function");
 
-  if (!res) {
-    console.error("secure: Unknown IP Address");
-    res = new Response(JSON.stringify({ error: "Unknown IP Address" }), {
-      status: 403,
-      headers: { "Content-Type": "application/json" },
-    });
+  if (!config) {
+    config = {
+      errorStatusCode: 403,
+      errorBody: JSON.stringify({ error: "Unknown error" }),
+    };
   }
 
   if (!req) {
-    return Result.err({ res, reason: "No request" });
+    console.error("secure: No request");
+    return Result.err({
+      res: new Response(JSON.stringify({ error: "Unknown error" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      }),
+      reason: "No request",
+    });
   }
 
   // Call req.ip() if it's defined
-  const ip = req.headers.get("x-forwarded-for");
+  const ip =
+    process.env.NODE_ENV === "development"
+      ? "127.0.0.1"
+      : req.headers.get("x-forwarded-for");
 
   if (!ip) {
-    return Result.err({ res, reason: "No remote address" });
+    console.error("secure: No IP");
+
+    return Result.err({
+      res: new Response(JSON.stringify({ error: "Unknown error" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      }),
+      reason: "No IP",
+    });
   }
 
   console.debug(`Received request from IP address: ${ip}`);
