@@ -5,12 +5,13 @@
 //
 
 import { Command } from "@commander-js/extra-typings";
-import packageJson from "./package.json";
-import { getPkgManager } from "./helpers/get-pkg-manager";
 import chalk from "chalk";
-import prompts from "prompts";
-import path from "path";
 import fs from "fs";
+import path from "path";
+import prompts from "prompts";
+import { getPkgManager } from "./helpers/get-pkg-manager";
+import { install } from "./helpers/install";
+import packageJson from "./package.json";
 
 let projectPath: string = "";
 
@@ -39,6 +40,7 @@ const program = new Command(packageJson.name)
     "--use-pnpm",
     "explicitly tell the CLI to bootstrap the app using pnpm"
   )
+  .option("--skip-middleware", "skip installing middleware")
   .allowUnknownOption()
   .parse(process.argv);
 
@@ -49,8 +51,6 @@ const packageManager = !!program.opts().useNpm
   : getPkgManager();
 
 async function run(): Promise<void> {
-  console.log("packageManager:", packageManager);
-
   if (
     !program.opts().projectPath ||
     program.opts().projectPath === "." ||
@@ -87,9 +87,73 @@ async function run(): Promise<void> {
     projectPath = res.path.trim();
   }
 
-  const resolvedProjectPath = path.resolve(projectPath);
+  const root = path.resolve(projectPath);
+  console.log(`Securing: ${chalk.green(root)}`);
 
-  console.log("Installing to:", resolvedProjectPath);
+  const packageJsonPath = path.join(root, "package.json");
+  const hasPackageJson = fs.existsSync(packageJsonPath);
+
+  if (!hasPackageJson) {
+    console.log(
+      chalk.red(`There is no package.json in the project path: ${root}`)
+    );
+    // TODO: Provide extra guidance here
+    process.exit(1);
+  }
+
+  console.log("Using", chalk.cyan(packageManager));
+
+  console.log("Installing packages. This may take a moment.");
+
+  await install(root, ["secure-middleware"], {
+    packageManager,
+    isOnline: true,
+  });
+  console.log();
+  console.log("Packages installed.");
+
+  if (!program.opts().skipMiddleware) {
+    console.log("Now installing middleware to secure your app...");
+
+    // Is this NextJS?
+    const nextConfigPath = path.join(root, "next.config.js");
+    const hasNextConfig = fs.existsSync(nextConfigPath);
+
+    if (hasNextConfig) {
+      console.log("NextJS detected.");
+
+      // Check if middleware doesn't already exist
+      const nextMiddlewarePath = path.join(root, "middleware.ts");
+      const hasNextMiddleware = fs.existsSync(nextMiddlewarePath);
+
+      if (hasNextMiddleware) {
+        // TODO: Update existing middleware
+        console.log(chalk.red("NextJS Middleware already exists."));
+        console.log(chalk.red("Aborting installation."));
+        process.exit(1);
+      }
+
+      // Copy clean middleware file into project
+      const nextMiddlewareTemplatePath = path.join(
+        __dirname,
+        "templates",
+        "nextjs-middleware.ts"
+      );
+      const nextMiddlewareTemplate = fs.readFileSync(
+        nextMiddlewareTemplatePath,
+        "utf8"
+      );
+      fs.writeFileSync(nextMiddlewarePath, nextMiddlewareTemplate);
+
+      console.log("NextJS middleware installed.");
+    } else {
+      console.log("NextJS not detected.");
+    }
+  } else {
+    console.log(`${chalk.yellow("Skipped middleware installation.")}`);
+  }
+
+  console.log(`${chalk.green("Success!")} Your app is now secure.`);
 }
 
 run().catch(async (reason) => {
