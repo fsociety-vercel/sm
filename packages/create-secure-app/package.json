@@ -1,0 +1,31 @@
+{
+  "name": "create-secure-app",
+  "description": "Installs middleware to secure your app.",
+  "version": "0.1.0",
+  "license": "MIT",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "create-secure-app": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "lint": "eslint *.ts*",
+    "build": "ncc build ./index.ts -o dist/",
+    "dev": "ncc run ./index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "18.14.1",
+    "@types/prompts": "2.0.1",
+    "@commander-js/extra-typings": "10.0.2",
+    "@vercel/ncc": "0.36.1",
+    "chalk": "5.2.0",
+    "commander": "10.0.0",
+    "eslint": "8.34.0",
+    "eslint-config-custom": "workspace:*",
+    "prompts": "2.4.2",
+    "tsconfig": "workspace:*",
+    "typescript": "4.9.5"
+  }
+}

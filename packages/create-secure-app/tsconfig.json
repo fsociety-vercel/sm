@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "moduleResolution": "node",
+    "preserveWatchOutput": true,
+    "skipLibCheck": false,
+    "noEmit": true,
+    "strict": true,
+    "resolveJsonModule": true,
+    "target": "es2019"
+  },
+  "exclude": ["node_modules", "dist"]
+}
