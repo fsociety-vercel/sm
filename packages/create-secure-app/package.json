@@ -13,7 +13,8 @@
   "scripts": {
     "lint": "eslint *.ts*",
     "build": "ncc build ./index.ts -o dist/",
-    "dev": "ncc run ./index.ts"
+    "dev": "ncc run ./index.ts",
+    "release": "ncc build ./index.ts -o ./dist/ --minify --no-cache --no-source-map-register"
   },
   "devDependencies": {
     "@commander-js/extra-typings": "10.0.2",
