@@ -1,7 +1,9 @@
 //@ts-ignore
 //import wasm from "./wasm/pkg/wasm_bg.wasm?module";
 //import * as wasm from "./wasm/pkg";
+import { IncomingMessage, ServerResponse } from "http";
 import { Result } from "true-myth";
+import crypto from "crypto";
 
 export interface SecureConfig {
   errorStatusCode?: number;
@@ -42,8 +44,8 @@ export interface SecureConfig {
 }*/
 
 export async function secure(
-  req: Request,
-  res?: Response,
+  req: Request | IncomingMessage,
+  res?: Response | ServerResponse,
   config?: SecureConfig
 ): Promise<Result<{ count: number }, { res: Response; reason: string }>> {
   const uuid = crypto.randomUUID(); // Temporary, only for timing
@@ -68,11 +70,30 @@ export async function secure(
     });
   }
 
-  // Call req.ip() if it's defined
-  const ip =
-    process.env.NODE_ENV === "development"
-      ? "127.0.0.1"
-      : req.headers.get("x-forwarded-for");
+  if (!req.headers) {
+    console.error("secure: No headers");
+    return Result.err({
+      res: new Response(JSON.stringify({ error: "Unknown error" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      }),
+      reason: "No headers",
+    });
+  }
+
+  let ip: string | undefined;
+
+  if (req instanceof IncomingMessage) {
+    // Get the IP address from the request
+    ip = req.headers["x-forwarded-for"] as string | undefined;
+  } else if (req instanceof Request) {
+    // Get the IP address from the request
+    ip = req.headers.get("x-forwarded-for") as string | undefined;
+  }
+
+  if (process.env.NODE_ENV === "development") {
+    ip = "127.0.0.1";
+  }
 
   if (!ip) {
     console.error("secure: No IP");
@@ -91,7 +112,7 @@ export async function secure(
   console.time(`secure: ${uuid}: fetch`);
 
   const decisionAPI =
-    process.env.DECISION_API || "http://localhost:3000/api/decide";
+    process.env.DECISION_API || "http://localhost:3001/api/decide";
 
   const decisionRes = await fetch(decisionAPI, {
     method: "POST",
