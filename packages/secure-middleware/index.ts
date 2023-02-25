@@ -55,7 +55,10 @@ export async function secure(
 
   console.time(`secure: ${uuid}: fetch`);
 
-  const decisionRes = await fetch("http://localhost:3001/api/decide", {
+  const decisionAPI =
+    process.env.DECISION_API || "http://localhost:3001/api/decide";
+
+  const decisionRes = await fetch(decisionAPI, {
     method: "POST",
     body: JSON.stringify({ ip }),
     next: { revalidate: config.cacheDecisionFor }, // TODO: May be a NextJS specific extension - check
