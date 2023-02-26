@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { secure } from "secure-middleware";
+//import { secure } from "secure-middleware";
 import crypto from "crypto";
 
 export default async function handler(
@@ -9,8 +9,9 @@ export default async function handler(
   const uuid = crypto.randomUUID(); // Temporary, only for timing
   console.debug(`api/test: ${uuid} start`);
   console.time(`api/test: ${uuid}`);
+  res.status(200).json({ name: "John Doe" });
 
-  const secureResponse = await secure(req);
+  /*const secureResponse = await secure(req);
   if (secureResponse.isErr) {
     console.error(`api/test: ${uuid}: error: ${secureResponse.error.reason}`);
     console.timeEnd(`api/test: ${uuid}`);
@@ -20,5 +21,5 @@ export default async function handler(
     console.timeEnd(`api/test: ${uuid}`);
     console.debug(`api/test: ${uuid} finish`);
     res.status(200).json({ name: "John Doe" });
-  }
+  }*/
 }

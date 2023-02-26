@@ -1,6 +1,102 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { secure } from "secure-middleware";
+import * as wasm from "./wasm/pkg";
+import { Result } from "true-myth";
+
+export interface SecureConfig {
+  errorStatusCode?: number;
+  errorBody?: string;
+  cacheDecisionFor?: number;
+}
+
+export async function secure(
+  req: Request,
+  res?: Response,
+  config?: SecureConfig
+): Promise<Result<{ count: number }, { res: Response; reason: string }>> {
+  const uuid = crypto.randomUUID(); // Temporary, only for timing
+  console.debug(`secure: ${uuid}`);
+
+  if (!config) {
+    config = {
+      errorStatusCode: 403,
+      errorBody: JSON.stringify({ error: "Unknown error" }),
+      cacheDecisionFor: 10,
+    };
+  }
+
+  if (!req) {
+    console.error("secure: No request");
+    return Result.err({
+      res: new Response(JSON.stringify({ error: "Unknown error" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      }),
+      reason: "No request",
+    });
+  }
+
+  if (!req.headers) {
+    console.error("secure: No headers");
+    return Result.err({
+      res: new Response(JSON.stringify({ error: "Unknown error" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      }),
+      reason: "No headers",
+    });
+  }
+
+  let ip: string | undefined;
+
+  if (req instanceof Request) {
+    // Get the IP address from the request
+    ip = req.headers.get("x-forwarded-for") as string | undefined;
+  }
+
+  if (process.env.NODE_ENV === "development") {
+    ip = "127.0.0.1";
+  }
+
+  if (!ip) {
+    console.error("secure: No IP");
+
+    return Result.err({
+      res: new Response(JSON.stringify({ error: "Unknown error" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      }),
+      reason: "No IP",
+    });
+  }
+
+  console.debug(`secure: ${uuid}: received request from IP address: ${ip}`);
+
+  console.time(`secure: ${uuid}: fetch`);
+
+  const decisionAPI =
+    process.env.DECISION_API || "https://sm-decide.vercel.app/api/decide";
+
+  const decisionRes = await fetch(decisionAPI, {
+    method: "POST",
+    body: JSON.stringify({ ip }),
+    next: { revalidate: config.cacheDecisionFor }, // TODO: May be a NextJS specific extension - check
+  });
+
+  const decision = await decisionRes.json();
+
+  console.debug(`secure: ${uuid}: decision: ${JSON.stringify(decision)}`);
+  console.timeEnd(`secure: ${uuid}: fetch`);
+
+  console.time(`secure: ${uuid}: wasm`);
+  const decideRes = await wasm.decide();
+  console.debug(`secure: ${uuid}: wasm: ${decideRes}`);
+  console.timeEnd(`secure: ${uuid}: wasm`);
+
+  return Result.ok({
+    count: 1,
+  });
+}
 
 export async function middleware(req: NextRequest) {
   const uuid = crypto.randomUUID(); // Temporary, only for timing
