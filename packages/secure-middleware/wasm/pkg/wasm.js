@@ -337,7 +337,7 @@ module.exports.__wbindgen_is_function = function (arg0) {
 };
 
 module.exports.__wbg_newnoargs_2b8b6bd7753c76ba = function (arg0, arg1) {
-    const ret = new Function(getStringFromWasm0(arg0, arg1));
+    const ret = getStringFromWasm0(arg0, arg1);
     return addHeapObject(ret);
 };
 
