@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { secure } from "secure-middleware";
 
+export const config = {
+  unstable_allowDynamic: [
+    "../../packages/secure-middleware/wasm/pkg/wasm.js", // allows a single file
+  ],
+};
+
 export async function middleware(req: NextRequest) {
   const uuid = crypto.randomUUID(); // Temporary, only for timing
   console.debug(`middleware: ${uuid} start`);
