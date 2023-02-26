@@ -1,9 +1,7 @@
 //@ts-ignore
 //import wasm from "./wasm/pkg/wasm_bg.wasm?module";
-//import * as wasm from "./wasm/pkg";
-import { IncomingMessage, ServerResponse } from "http";
+import * as wasm from "./wasm/pkg";
 import { Result } from "true-myth";
-import crypto from "crypto";
 
 export interface SecureConfig {
   errorStatusCode?: number;
@@ -11,13 +9,13 @@ export interface SecureConfig {
   cacheDecisionFor?: number;
 }
 
-/*async function decide(ip: string) {
+async function decide() {
   const { exports } = (await WebAssembly.instantiate(wasm)) as any;
 
   // Set up a place for a return value on the stack
   const retptr = exports.__wbindgen_add_to_stack_pointer(-16);
 
-  exports.decide(ip, retptr);
+  exports.decide(retptr);
 
   // Cast the shared memory buffer to 32 bit words to retrieve the
   // pointer to the returned string and the string's length
@@ -31,7 +29,7 @@ export interface SecureConfig {
   const memoryBytes = new Uint8Array(exports.memory.buffer);
   const strBytes = memoryBytes.subarray(str, str + len);
 
-  const result = new TextDecoder("utf-8", {
+  const greeting = new TextDecoder("utf-8", {
     ignoreBOM: true,
     fatal: true,
   }).decode(strBytes);
@@ -40,12 +38,12 @@ export interface SecureConfig {
   exports.__wbindgen_add_to_stack_pointer(16);
   exports.__wbindgen_free(str, len);
 
-  return result;
-}*/
+  return new Response(greeting);
+}
 
 export async function secure(
-  req: Request | IncomingMessage,
-  res?: Response | ServerResponse,
+  req: Request,
+  res?: Response,
   config?: SecureConfig
 ): Promise<Result<{ count: number }, { res: Response; reason: string }>> {
   const uuid = crypto.randomUUID(); // Temporary, only for timing
@@ -83,10 +81,7 @@ export async function secure(
 
   let ip: string | undefined;
 
-  if (req instanceof IncomingMessage) {
-    // Get the IP address from the request
-    ip = req.headers["x-forwarded-for"] as string | undefined;
-  } else if (req instanceof Request) {
+  if (req instanceof Request) {
     // Get the IP address from the request
     ip = req.headers.get("x-forwarded-for") as string | undefined;
   }
@@ -112,7 +107,7 @@ export async function secure(
   console.time(`secure: ${uuid}: fetch`);
 
   const decisionAPI =
-    process.env.DECISION_API || "http://localhost:3001/api/decide";
+    process.env.DECISION_API || "https://sm-decide.vercel.app/api/decide";
 
   const decisionRes = await fetch(decisionAPI, {
     method: "POST",
@@ -125,10 +120,10 @@ export async function secure(
   console.debug(`secure: ${uuid}: decision: ${JSON.stringify(decision)}`);
   console.timeEnd(`secure: ${uuid}: fetch`);
 
-  //console.time(`secure: ${uuid}: wasm`);
-  //const decideRes = wasm.decide(ip);
-  //console.log(decideRes);
-  //console.timeEnd(`secure: ${uuid}: wasm`);
+  console.time(`secure: ${uuid}: wasm`);
+  const decideRes = await wasm.decide();
+  console.debug(`secure: ${uuid}: wasm: ${decideRes}`);
+  console.timeEnd(`secure: ${uuid}: wasm`);
 
   return Result.ok({
     count: 1,

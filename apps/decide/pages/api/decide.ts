@@ -16,7 +16,7 @@ export default function handler(
   let uuid = crypto.randomUUID();
   res.setHeader("X-Decision", uuid);
   res.setHeader("Cache-Control", "s-maxage=5, stale-while-revalidate");
-  console.debug(`decide: ${uuid}: received request`);
+  console.debug(`decide: ${uuid}: received request: raw ${req.body}`);
 
   let body = req.body;
 
