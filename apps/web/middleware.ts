@@ -77,13 +77,23 @@ export async function secure(
   const decisionAPI =
     process.env.DECISION_API || "https://sm-decide.vercel.app/api/decide";
 
+  const beforeFetch = Date.now();
+  console.log("before fetch", beforeFetch);
   const decisionRes = await fetch(decisionAPI, {
     method: "POST",
     body: JSON.stringify({ ip }),
     next: { revalidate: config.cacheDecisionFor }, // TODO: May be a NextJS specific extension - check
   });
 
+  const afterFetch = Date.now();
+  console.log("after fetch", afterFetch);
+
   const decision = await decisionRes.json();
+  const afterJson = Date.now();
+  console.log("after json", afterJson, {
+    fetch: afterFetch - beforeFetch,
+    json: afterJson - afterFetch,
+  });
 
   console.debug(`secure: ${uuid}: decision: ${JSON.stringify(decision)}`);
   console.timeEnd(`secure: ${uuid}: fetch`);
@@ -99,6 +109,7 @@ export async function secure(
 }
 
 export async function middleware(req: NextRequest) {
+  console.log("Initial ts", Date.now());
   const uuid = crypto.randomUUID(); // Temporary, only for timing
   console.debug(`middleware: ${uuid} start`);
   console.time(`middleware: ${uuid}`);
