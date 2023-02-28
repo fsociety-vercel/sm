@@ -77,6 +77,7 @@ export async function secure(
   const decisionAPI =
     process.env.DECISION_API || "https://sm-decide.vercel.app/api/decide";
 
+  await fetch('https://example.vercel.sh');
   const beforeFetch = Date.now();
   console.log("before fetch", beforeFetch);
   const decisionRes = await fetch(decisionAPI, {
