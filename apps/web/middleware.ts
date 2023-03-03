@@ -80,11 +80,14 @@ export async function secure(
   await fetch('https://example.vercel.sh');
   const beforeFetch = Date.now();
   console.log("before fetch", beforeFetch);
+  performance.mark('beforeFetch');
   const decisionRes = await fetch(decisionAPI, {
     method: "POST",
     body: JSON.stringify({ ip }),
     next: { revalidate: config.cacheDecisionFor }, // TODO: May be a NextJS specific extension - check
   });
+  performance.mark('afterFetch');
+  performance.measure('justFetch', 'beforeFetch', 'afterFetch');
 
   const afterFetch = Date.now();
   console.log("after fetch", afterFetch);
