@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import * as wasm from "./wasm/pkg";
 import { Result } from "true-myth";
 
 export interface SecureConfig {
@@ -101,11 +100,6 @@ export async function secure(
 
   console.debug(`secure: ${uuid}: decision: ${JSON.stringify(decision)}`);
   console.timeEnd(`secure: ${uuid}: fetch`);
-
-  console.time(`secure: ${uuid}: wasm`);
-  const decideRes = await wasm.decide();
-  console.debug(`secure: ${uuid}: wasm: ${decideRes}`);
-  console.timeEnd(`secure: ${uuid}: wasm`);
 
   return Result.ok({
     count: 1,
